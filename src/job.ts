@@ -1,9 +1,58 @@
 import { Job } from "bullmq";
+import { env } from "./environment";
 import { PdfProcessTaskData } from "./types";
+import path from "path";
+import fs from "fs";
+import { Stream } from "stream";
+import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+
+const s3 = new S3Client({
+  credentials: {
+    accessKeyId: env.S3_ACCESS_KEY,
+    secretAccessKey: env.S3_SECRET_KEY,
+  },
+  region: "us-east-1",
+});
+
+async function downloadFile(key: string, jobName: string) {
+  const command = new GetObjectCommand({
+    Bucket: env.S3_BUCKET,
+    Key: key,
+  });
+  const response = await s3.send(command);
+
+  const filePath = path.join(__dirname, "..", "tmp", jobName, key);
+
+  // Ensure directory exists
+  fs.mkdirSync(path.join(__dirname, "..", "tmp", jobName), {
+    recursive: true,
+  });
+
+  const writableStream = fs.createWriteStream(filePath);
+
+  const stream = response.Body as Stream;
+
+  return new Promise((resolve, reject) => {
+    stream.pipe(writableStream);
+
+    writableStream.on("finish", () => {
+      writableStream.close();
+      console.log("Finished downloading file");
+      resolve(true);
+    });
+
+    writableStream.on("error", (err) => {
+      console.log("Error downloading file", err);
+      writableStream.close();
+      reject(err);
+    });
+  });
+}
 
 export async function processPdfTask(job: Job<PdfProcessTaskData>) {
   console.log("Processing PDF task", job.data);
 
-  // Next step download the file
+  await downloadFile(job.data.key, job.name);
+
   return true;
 }

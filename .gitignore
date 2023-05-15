@@ -1,4 +1,5 @@
 dist/
 .env
+tmp/
 *.log
 node_modules/
