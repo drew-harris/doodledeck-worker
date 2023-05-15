@@ -54,5 +54,21 @@ export async function processPdfTask(job: Job<PdfProcessTaskData>) {
 
   await downloadFile(job.data.key, job.name);
 
+  // Update progress every second
+  const interval = setInterval(async () => {
+    const progress = job.progress;
+    if (typeof progress == "number" && progress < 100) {
+      await job.updateProgress(progress + 9);
+    }
+  }, 500);
+
+  // Do some work
+  await new Promise((resolve) => setTimeout(resolve, 5000));
+
+  clearInterval(interval);
+
+  // set progress to 100%
+  await job.updateProgress(100);
+
   return true;
 }
