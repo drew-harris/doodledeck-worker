@@ -1,0 +1,24 @@
+{
+  "name": "doodledeck-worker",
+  "version": "1.0.0",
+  "description": "Worker for pdf generation and processing for doodledeck",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "serve": "node dist/index.js",
+    "dev": "esrun --watch --preserveConsole src/index.ts"
+  },
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "@digitak/esrun": "^3.2.24",
+    "@types/node": "^20.1.4",
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "@t3-oss/env-core": "^0.3.1",
+    "bullmq": "^3.13.4",
+    "dotenv": "^16.0.3",
+    "zod": "^3.21.4"
+  }
+}
